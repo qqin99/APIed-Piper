@@ -89,6 +89,7 @@ def main(argv):
         # POST the user
         conn.request("POST", "/api/users", params, headers)
         response = conn.getresponse()
+
         data = response.read()
         d = json.loads(data)
 
