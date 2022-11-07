@@ -17,7 +17,7 @@ module.exports = function (router) {
                 if (err){
                     ret.message = "ERROR";
                     ret.data = "Invalid user ID"
-                    res.json.status(404).send(ret);
+                    res.json(404,ret);
                     return router;
                 } else {
                     resolve(user);
@@ -40,13 +40,13 @@ module.exports = function (router) {
 
 	// PUT
 	userRoute.put(async function (req, res) {
-        //  handle query
+        // this is user's http put query, py script put data in the url
         var id = req.params.id;
         var params = {
-            "name":req.query.name,
-            "email":req.query.email,
-            "pendingTasks":req.query.pendingTasks,
-            "dateCreated": req.query.dateCreated
+            "name":req.params.name,
+            "email":req.params.email,
+            "pendingTasks":req.params.pendingTasks,
+            "dateCreated": req.params.dateCreated
         };
 
         var user_name;

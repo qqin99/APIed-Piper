@@ -47,8 +47,8 @@ module.exports = function (router) {
                 return router;
             } else {
                 ret.message = "ERROR";
-                ret.data = "Server Bugs"
-                res.json(404, ret);
+                ret.data = "Server Error"
+                res.json(500, ret);
                 return router;
             }
         })
@@ -57,16 +57,16 @@ module.exports = function (router) {
 
 	// PUT
 	taskRoute.put(async (req, res) => {
-        //  handle query
+        //  here it should be params not query as python file put data in url
         var id = req.params.id;
         var params = {
-            'name':req.query.name,
-            "description":req.query.description,
-            "deadline":req.query.deadline,
-            "completed":req.query.completed,
-            "assignedUser":req.query.assignedUser,
-            "assignedUserName":req.query.assignedUserName,
-            "dateCreated":req.query.dateCreated,
+            'name':req.params.name,
+            "description":req.params.description,
+            "deadline":req.params.deadline,
+            "completed":req.params.completed,
+            "assignedUser":req.params.assignedUser,
+            "assignedUserName":req.params.assignedUserName,
+            "dateCreated":req.params.dateCreated,
         };
         if (typeof params.description === 'undefined') {params.description = '';}
         if (typeof params.completed === 'undefined') {params.completed = false;}
@@ -96,7 +96,7 @@ module.exports = function (router) {
             if(task == null){
                 res.status(404).send({
                     "message":"ERROR",
-                    "data":"Task Not Found(Invalid Task Id)"
+                    "data":"Invalid Task Id, task Not Found"
                 });
                 return router;
             } else {
@@ -106,7 +106,7 @@ module.exports = function (router) {
                     var old_assigned_user = await User.findByIdAndUpdate(old_user_id.toString(), {$pull:{"pendingTasks":task._id}},(err, user)=>{
                         if (err) {console.log(err);}
                         else{
-                            console.log("old user tasks handled");
+                            console.log("Previous assgined user's tasks updated");
                             return user;
                         }
                     }).catch(err=>{console.log(err);});
@@ -117,12 +117,12 @@ module.exports = function (router) {
                 // update new assigned user
 
                 if (typeof req.query.assignedUser === "undefined"){
-                    console.log("undefined new assignedUser, do nothing");
+                    console.log("Undefined new assigned User, do nothing");
                 }else{
                     var new_assigned_user = await User.findByIdAndUpdate(params.assignedUser.toString(), {$addToSet:{"pendingTasks":task._id}}, (err, user)=>{
                         if(err){console.log(err);}
                         else{
-                            console.log("new user tasks handled");
+                            console.log("New assigned user's tasks updated");
                             return user;
                         }
                     });
@@ -130,7 +130,7 @@ module.exports = function (router) {
 
                 // update task
                 if(new_assigned_user == null){
-                    console.log("new assigned user invalid");
+                    console.log("New assigned user is invalid");
                     params.assignedUser = "";
                     params.assignedUserName = "unassigned";
                 }
@@ -141,13 +141,13 @@ module.exports = function (router) {
                     if(err){
                         console.log(err);
                         ret.message = "ERROR";
-                        ret.data = "update failed because of server side error";
+                        ret.data = "Update failed due to server error";
                         res.json(500, ret);
                         return router;
                     }
                     else{
-                        ret.data = "Task updated";
-                        ret.message = "OK";
+                        ret.data = "Task updated.";
+                        ret.message = "Success!";
                         res.status(200).json(ret);
 
                     }
@@ -157,7 +157,7 @@ module.exports = function (router) {
         }).catch(error=>{
             console.log(error);
             ret.message = "ERROR";
-            ret.data = "Task Not Found(Invalid Task Id)";
+            ret.data = "Task Not Found(Invalid Task Id).";
             res.json(404, ret);
             return router;
         });
@@ -184,10 +184,10 @@ module.exports = function (router) {
             console.log(task);
             if (!task) {
                 ret.message = "ERROR";
-                ret.data = "Task Id not found";
+                ret.data = "Task Id not found.";
                 res.json(404, ret);
             } else {
-                console.log("task delete from task_list");
+                console.log("Task is deleted from task list");
                 var handleUser = new Promise((resolve, reject) => {
                     User.findById(task.assignedUser, (err, user) => {
                         if (err){
@@ -201,22 +201,22 @@ module.exports = function (router) {
                     // this user can be null
                     if (user) {
                         var new_tasks = user.pendingTasks.filter( value => value !== id);
-                        // console.log(new_tasks);
+
                         User.findOneAndUpdate({"_id":task.assignedUser}, {$set:{pendingTasks: new_tasks}}).then(()=>{
-                            ret.message = "OK";
-                            ret.data = "Task deleted";
+                            ret.message = "Success";
+                            ret.data = "Task is deleted";
                             res.json(200, ret);
                         }).catch( err => {
                             console.log(err);
                             ret.message = "ERROR";
-                            ret.data = "Server Error on updating User";
+                            ret.data = "Update failed due to Server Error";
                             res.json(500, ret);
                         });
                     }
                 }).catch(err => {
                     console.log(err);
                     ret.message = "ERROR";
-                    ret.data = "Server Error on finding User";
+                    ret.data = "Finding user failed due to Server Error";
                     res.json(500, ret);
                 });
             }

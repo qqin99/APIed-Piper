@@ -2,37 +2,36 @@ var Task = require('../models/task');
 var User = require('../models/user');
 
 module.exports = function (router) {
-    var userRoute = router.route('/tasks');
+    var taskRouter = router.route('/tasks');
     var ret = {
-    	"message":"OK",
+    	"message":"Success",
     	"data":{}
     }
 
-    // POST: todo: unassigned
-    userRoute.post(async (req, res) => {
-        // var date = new Date();
-        // I think the improved logic here should be params = {}, then parse the req, add something inside
+    // POST
+    taskRouter.post(async (req, res) => {
+        // here it should be put in body not param
         var params = {
-            'name':req.param('name'),
-            "description":req.param('description'),
-            "deadline":req.param('deadline'),
-            "completed":req.param('completed'),
-            "assignedUser":req.param('assignedUser'),
-            "assignedUserName":req.param('assignedUserName'),
-            // "dateCreated": new Date()
+            'name':req.body.name,
+            "description":req.body.description,
+            "deadline":req.body.deadline,
+            "completed":req.body.completed,
+            "assignedUser":req.body.assignedUser,
+            "assignedUserName":req.body.assignedUserName,
+            // "dateCreated" will be generated automatically
         }
 
         //validation
         if (typeof params.name === 'undefined'){
             ret.message = "ERROR";
-            ret.data = "Undefined task name";
+            ret.data = "Task name not found";
             res.json(404, ret);
             return router;
         }
 
         if (typeof params.deadline === 'undefined'){
             ret.message = "ERROR";
-            ret.data = "Undefined task deadline";
+            ret.data = "Task deadline not found";
             res.json(404, ret);
             return router;
         }
@@ -61,14 +60,14 @@ module.exports = function (router) {
             return new_task;
         }).then((new_task)=>{
             res.status(201).send({
-                "message":"OK",
+                "message":"Great! Task created",
                 "data":new_task
             });
         });
     });
 
     // GET
-    userRoute.get((req, res) => {
+    taskRouter.get((req, res) => {
         //  handle query
         var filter = {};
         if("where" in req.query){
@@ -115,13 +114,13 @@ module.exports = function (router) {
             if (count){
                 ret.data = tasks.length;
             }
-            res.json(200, ret);
+            res.status(200).json(ret);
 
         }).catch( err => {
             console.log("error;" + err);
             ret.message = "ERROR";
             ret.data = "Server Error";
-            res.json(500, ret);
+            res.status(500).json(ret);
         })
 	});
 

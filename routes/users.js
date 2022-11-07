@@ -11,10 +11,10 @@ module.exports = function (router) {
     // POST
     userRoute.post(async (req, res) => {
         var params = {
-            "name":req.param.name,
-            "email":req.param.email,
-            "pendingTasks":req.param.pendingTasks
-            // "dateCreated" does not have to be set up here it is automatic
+            "name":req.body.name,
+            "email":req.body.email,
+            "pendingTasks":req.body.pendingTasks
+            // Here we should use body not param, cos post should be post in body. "dateCreated" is automatically generated.
         }
 
         // validation: Users cannot be created (or updated) without a name or email.
